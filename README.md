@@ -1,8 +1,8 @@
 #Coupling Two TelosB Motes
 ##General Description
 For this project, your main task is to extend the work done in the first project, and develop a TinyOS application to run on two TelosB motes, such that
->1. Each of them will sense the corresponding values using their built-in light and temperature and humidity sensors.
->2. You will program them so that they communicate in a manner that enables a basic form of networked-based collaborative task execution of the two motes.
+1. Each of them will sense the corresponding values using their built-in light and temperature and humidity sensors.
+2. You will program them so that they communicate in a manner that enables a basic form of networked-based collaborative task execution of the two motes.
 ---
 Recall that the red LED can be used at your discretion (for example, you could toggle it on/off to indicate that both events (“dark and hot”) have been detected or not...
 ---
