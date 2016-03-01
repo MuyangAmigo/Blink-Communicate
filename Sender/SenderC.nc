@@ -15,6 +15,7 @@ module SenderC {
   uses interface Read<uint16_t> as ReadT;
   uses interface Read<uint16_t> as ReadL;
   uses interface Packet;
+  uses interface AMPacket;
   uses interface AMSend;
   uses interface SplitControl as RadioControl;
 }
@@ -22,6 +23,9 @@ module SenderC {
 implementation {
   bool busy;
   message_t pkt;
+
+  uint8_t S_temperature;
+  uint16_t S_light;
 
   event void Boot.booted() {
     call Timer1.startPeriodic(2000);
@@ -43,7 +47,17 @@ implementation {
   event void RadioControl.stopDone(error_t err) {}
 
   event void Timer.fired() {
+    if (!busy) {
 
+      ProjB_Msg* sndPayload = (ProjB_Msg*)(call Packet.getPayload(&pkt, sizeof (ProjB_Msg)));
+
+      sndPayload -> Temperature = S_temperature;
+      sndPayload -> Light = S_light;
+
+      if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ProjB_Msg)) == SUCCESS) {
+        busy = TRUE;
+      }
+  } 
   }
 
   event void Timer1.fired() {
@@ -57,19 +71,24 @@ implementation {
   }
 
   event void ReadT.readDone(error_t result, uint16_t val) {
-    Temperature_Msg* payload;
-    if (result == SUCCESS) {
-      if (busy == FALSE) {
-        payload = (Temperature_Msg*)(call Packet.getPayload(&pkt,sizeof(Temperature_Msg)));
-        if (payload == NULL){
-          return;
+
+      if (result == SUCCESS){
+        if (val > 0x0055) {
+          call Leds.led1On();
+        }
+        else {
+          call Leds.led1Off();
+        }
+
+        if (busy == FALSE) {
+      //  payload = (Temperature_Msg*)(call Packet.getPayload(&pkt,sizeof(Temperature_Msg)));
+          S_temperature = val;
         }
       }
-    }
   }
 
   event void ReadL.readDone(error_t result, uint16_t val) {
-    Light_Msg* payload;
+  /*  Light_Msg* payload;
     if (result == SUCCESS) {
       if (busy == FALSE) {
         payload = (Light_Msg*)(call Packet.getPayload(&pkt,sizeof(Light_Msg)));
@@ -77,7 +96,22 @@ implementation {
           return;
         }
       }
-    }
+    }*/
+
+      if (result == SUCCESS){
+        if (val < 0x0080) {
+          call Leds.led2On();
+        }
+        else {
+          call Leds.led2Off();
+        }
+
+        if (busy == FALSE) {
+      //  payload = (Temperature_Msg*)(call Packet.getPayload(&pkt,sizeof(Temperature_Msg)));
+          S_light = val;
+        }
+      }
+
   }
 
   event void AMSend.sendDone(message_t* msg, error_t err) {

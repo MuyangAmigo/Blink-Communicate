@@ -1,16 +1,17 @@
 configuration ReceiverAppC{}
 
 implementation{
-  components MianC, LedsC;
+  components MainC, LedsC;
   components ReceiverC as App;
   components ActiveMessageC;
-  components SerialActiveMessageC;
+  components new AMSenderC(AM_PROJB_MSG);
+  components new AMReceiverC(AM_PROJB_MSG);
 
   App.Boot -> MainC.Boot;
   App.Leds -> LedsC.Leds;
-  App.Packet -> SerialActiveMessageC;
-  App.AMSend -> SerialActiveMessageC.AMSend[AM_TEMPERATURE_MSG];
-  App.Receive -> ActiveMessageC.Receive[AM_TEMPERATURE_MSG];
+  App.Packet -> AMSenderC;
+  App.AMPacket -> AMSenderC;
+  App.AMSend -> AMSenderC;
   App.RadioControl -> ActiveMessageC;
-  App.SerialControl -> SerialActiveMessageC;
+  App.Receive -> AMReceiverC;
 }

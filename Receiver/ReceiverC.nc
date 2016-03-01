@@ -6,9 +6,10 @@ module ReceiverC {
     interface Leds;
     interface Packet;
     interface AMSend;
+    interface AMPacket;
     interface Receive;
     interface SplitControl as RadioControl;
-    interface SplitControl as SerialControl;
+  //  interface SplitControl as SerialControl;
   }
 }
 
@@ -19,7 +20,7 @@ implementation {
   event void Boot.booted(){
     busy = FALSE;
     call RadioControl.start();
-    call SerialControl.start();
+  //  call SerialControl.start();
   }
 
   event void RadioControl.startDone(error_t err) {
@@ -28,38 +29,62 @@ implementation {
     }
   }
   event void RadioControl.stopDone(error_t err){}
-
+/*
   event void SerialControl.startDone(error_t err){
     if (err != SUCCESS) {
       call SerialControl.start();
     }
   }
 
-  event void SerialControl.stopDone(error_t err){}
-  event message_t* Receive.receive(message_t* msg void* payload, uint8_t len){
-    Temperature_Msg* rcvPayload;
-    Temperature_Msg* sndPayload;
+  event void SerialControl.stopDone(error_t err){}*/
 
-    call Leds.led1Toggle();
-    if(len != sizeof(Temperature_Msg)) {
+  event message_t * Receive.receive(message_t* msg, void* payload, uint8_t len){
+
+   // ProjB_Msg* rcvPayload;
+   // Temperature_Msg* sndPayload;
+
+   // call Leds.led1Toggle();
+
+    if(len != sizeof(ProjB_Msg)) {
       return NULL;
     }
-    rcvPayload = (Temperature_Msg*)payload;
-    sndPayload = (Temperature_Msg*)call Packet.getPayload(&pkt, sizeof(Temperature_Msg));
 
-    if(sndPayload == NULL) {
+    else {
+
+      ProjB_Msg* rcvPayload = (ProjB_Msg*) payload;
+    //sndPayload = (Temperature_Msg*)call Packet.getPayload(&pkt, sizeof(Temperature_Msg));
+
+ /*   if(sndPayload == NULL) {
       return NULL;
     }
-    sndPayload ->temperature = rcvPayload->temperature;
-    if(call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(Temperature_Msg))==SUCCESS){
-      busy = TRUE;
+    sndPayload ->temperature = rcvPayload->temperature;*/
+
+      uint8_t myTemperature = rcvPayload -> Temperature;
+      uint16_t myLight = rcvPayload -> Light;
+
+      if (myTemperature > 0x0055) {
+        call Leds.led1On();
+      }
+      else {
+        call Leds.led1Off();
+      }
+
+
+      if (myLight < 0x0080) {
+        call Leds.led2On();
+      }
+      else {
+        call Leds.led2Off();
     }
+
     return msg;
+    }
   }
+
   event void AMSend.sendDone(message_t* msg, error_t err) {
     if(&pkt == msg){
       busy = FALSE;
-      call Leds.led1Toggle();
+    //  call Leds.led1Toggle();
     }
   }
 }
