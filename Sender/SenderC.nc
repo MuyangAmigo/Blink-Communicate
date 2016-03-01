@@ -9,10 +9,7 @@
 module SenderC {
   uses interface Boot;
   uses interface Timer<TMilli> as Timer;
-<<<<<<< Updated upstream
   uses interface Timer<TMilli> as Timer1;
-=======
->>>>>>> Stashed changes
   uses interface Timer<TMilli> as Timer2;
   uses interface Leds;
   uses interface Read<uint16_t> as ReadT;
@@ -45,9 +42,8 @@ implementation {
 
   event void RadioControl.stopDone(error_t err) {}
 
-<<<<<<< Updated upstream
   event void Timer.fired() {
-    
+
   }
 
   event void Timer1.fired() {
@@ -60,18 +56,6 @@ implementation {
     call ReadL.read();
   }
 
-=======
-  event void Timer1.fired() {
-    //call Leds.led0Toggle();
-    call ReadT.read();
-  }
-
-  event void Timer2.fired() {
-    //call Leds.led0Toggle();
-    call ReadL.read();
-  }
-
->>>>>>> Stashed changes
   event void ReadT.readDone(error_t result, uint16_t val) {
     Temperature_Msg* payload;
     if (result == SUCCESS) {
