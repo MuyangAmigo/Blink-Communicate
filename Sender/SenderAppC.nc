@@ -15,7 +15,11 @@ implementation {
   App.Leds -> LedsC;
   App.Timer -> Timer;
   App.Timer1 -> Timer1;
+<<<<<<< Updated upstream
   App.Timer2 -> Timer2;
+=======
+  App.Timer2 -> Timer2；
+>>>>>>> Stashed changes
   App.ReadT -> Sensor;
   App.ReadL -> LumSensor;
   App.Packet -> ActiveMessageC;
