@@ -1,13 +1,13 @@
 <tos_image>
   <ident>
-    <uidhash>94E25F73L</uidhash>
-    <hostname>dhcp-10-105-110</hostname>
-    <timestamp>56D60263L</timestamp>
     <appname>ReceiverAppC</appname>
+    <uidhash>2C0E9BC0L</uidhash>
     <username>JiawenOu</username>
+    <hostname>dhcp-10-105-110</hostname>
     <userhash>12C3A70DL</userhash>
-    <platform>telosb</platform>
     <deluge_support>no</deluge_support>
+    <platform>telosb</platform>
+    <timestamp>56D60B28L</timestamp>
   </ident>
   <image format="ihex">
 :104000005542200135D0085A8245621231400039AC

@@ -2,34 +2,32 @@
 #include "Message.h"
 #include "stdint.h"
 
-#define TIMER_PERIOD 2000 //temp
+module RoleOneC{
+  uses {
+    interface Boot;
+    interface Leds;
+    interface Receive;
+    interface SplitControl as RadioControl;
+  }
+    uses interface Timer<TMilli> as Timer;
+    uses interface Timer<TMilli> as Timer1;
+    uses interface Timer<TMilli> as Timer2;  //LIGHT SENSOR TIMER
+    uses interface Read<uint16_t> as ReadL;
 
-
-
-module SenderC {
-  uses interface Boot;
-  uses interface Timer<TMilli> as Timer;
-  uses interface Timer<TMilli> as Timer1;
-  uses interface Timer<TMilli> as Timer2;
-  uses interface Leds;
-  uses interface Read<uint16_t> as ReadT;
-  uses interface Read<uint16_t> as ReadL;
-  uses interface Packet;
-  uses interface AMPacket;
-  uses interface AMSend;
-  uses interface SplitControl as RadioControl;
+    uses interface Packet;
+    uses interface AMPacket;
+    uses interface AMSend;
 }
 
-implementation {
+implementation{
+//Start Send Light
   bool busy;
   message_t pkt;
 
-  uint8_t S_temperature;
   uint16_t S_light;
 
   event void Boot.booted() {
-    call Timer1.startPeriodic(2000);
-    call Timer2.startPeriodic(1000);
+    call Timer2.startPeriodic(1000);//Light
 
     busy = FALSE;
     call RadioControl.start();
@@ -37,7 +35,7 @@ implementation {
 
   event void RadioControl.startDone(error_t err) {
    if (err == SUCCESS) {
-     call Timer.startPeriodic(TIMER_PERIOD);
+     call Timer.startPeriodic(2000);
    }
    else {
      call RadioControl.start();
@@ -51,38 +49,21 @@ implementation {
 
       ProjB_Msg* sndPayload = (ProjB_Msg*)(call Packet.getPayload(&pkt, sizeof (ProjB_Msg)));
 
-      sndPayload -> Temperature = S_temperature;
       sndPayload -> Light = S_light;
 
       if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ProjB_Msg)) == SUCCESS) {
         busy = TRUE;
       }
-  } 
+  }
   }
 
   event void Timer1.fired() {
-    call ReadT.read();
   }
 
   event void Timer2.fired() {
     call ReadL.read();
   }
 
-  event void ReadT.readDone(error_t result, uint16_t val) {
-
-      if (result == SUCCESS){
-        if (val > 0x0055) {
-          call Leds.led1On();
-        }
-        else {
-          call Leds.led1Off();
-        }
-
-        if (busy == FALSE) {
-          S_temperature = val;
-        }
-      }
-  }
 
   event void ReadL.readDone(error_t result, uint16_t val) {
 
@@ -101,8 +82,35 @@ implementation {
 
   }
 
-  event void AMSend.sendDone(message_t* msg, error_t err) {
 
+//Start Receive Temperature
+event message_t * Receive.receive(message_t* msg, void* payload, uint8_t len){
+
+
+  if(len != sizeof(ProjB_Msg)) {
+    return NULL;
   }
+
+  else {
+    ProjB_Msg* rcvPayload = (ProjB_Msg*) payload;
+
+    uint8_t myTemperature = rcvPayload -> Temperature;
+
+    if (myTemperature > 0x0055) {
+      call Leds.led1On();
+    }
+    else {
+      call Leds.led1Off();
+    }
+
+  return msg;
+  }
+}
+
+event void AMSend.sendDone(message_t* msg, error_t err) {
+  if(&pkt == msg){
+    busy = FALSE;
+  }
+}
 
 }

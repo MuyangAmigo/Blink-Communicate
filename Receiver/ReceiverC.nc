@@ -9,7 +9,6 @@ module ReceiverC {
     interface AMPacket;
     interface Receive;
     interface SplitControl as RadioControl;
-  //  interface SplitControl as SerialControl;
   }
 }
 
@@ -20,7 +19,6 @@ implementation {
   event void Boot.booted(){
     busy = FALSE;
     call RadioControl.start();
-  //  call SerialControl.start();
   }
 
   event void RadioControl.startDone(error_t err) {
@@ -29,21 +27,9 @@ implementation {
     }
   }
   event void RadioControl.stopDone(error_t err){}
-/*
-  event void SerialControl.startDone(error_t err){
-    if (err != SUCCESS) {
-      call SerialControl.start();
-    }
-  }
-
-  event void SerialControl.stopDone(error_t err){}*/
 
   event message_t * Receive.receive(message_t* msg, void* payload, uint8_t len){
 
-   // ProjB_Msg* rcvPayload;
-   // Temperature_Msg* sndPayload;
-
-   // call Leds.led1Toggle();
 
     if(len != sizeof(ProjB_Msg)) {
       return NULL;
@@ -52,12 +38,7 @@ implementation {
     else {
 
       ProjB_Msg* rcvPayload = (ProjB_Msg*) payload;
-    //sndPayload = (Temperature_Msg*)call Packet.getPayload(&pkt, sizeof(Temperature_Msg));
 
- /*   if(sndPayload == NULL) {
-      return NULL;
-    }
-    sndPayload ->temperature = rcvPayload->temperature;*/
 
       uint8_t myTemperature = rcvPayload -> Temperature;
       uint16_t myLight = rcvPayload -> Light;
@@ -75,7 +56,7 @@ implementation {
       }
       else {
         call Leds.led2Off();
-    }
+      }
 
     return msg;
     }
@@ -84,7 +65,6 @@ implementation {
   event void AMSend.sendDone(message_t* msg, error_t err) {
     if(&pkt == msg){
       busy = FALSE;
-    //  call Leds.led1Toggle();
     }
   }
 }
