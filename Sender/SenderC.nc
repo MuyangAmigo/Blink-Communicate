@@ -24,7 +24,7 @@ implementation {
   bool busy;
   message_t pkt;
 
-  uint8_t S_temperature;
+  uint16_t S_temperature;
   uint16_t S_light;
 
   event void Boot.booted() {
@@ -57,7 +57,7 @@ implementation {
       if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(ProjB_Msg)) == SUCCESS) {
         busy = TRUE;
       }
-  } 
+  }
   }
 
   event void Timer1.fired() {
